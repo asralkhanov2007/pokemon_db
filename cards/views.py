@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q, Avg, Count, Max
 from django.core.paginator import Paginator
 
@@ -240,30 +240,67 @@ def card_create(request):
         image_large = request.POST.get('image_large')
         set_id = request.POST.get('set_id')
 
-    if not card_id or not name:
-        return render(request, 'cards/card_from.html', {
-            'action': 'Create',
-            'error': 'Card ID and Name are required.',
-            'sets': Cardset.objects.all(),
-            'rarities': Card.RARITY_CHOICES,
-        })
-    card_set = Cardset.objects.filter(set_id=set_id).first() if set_id else None
-    card = Cardset.objects.create(
-        card_id=card_id,
-        name=name,
-        supertype=supertype,
-        rarity=rarity or '',
-        card_number=card_number or '',
-        artist=artist or '',
-        flavor_text=flavor_text or '',
-        image_small=image_small or '',
-        image_large=image_large or '',
-        card_set=card_set,
+        if not card_id or not name:
+            return render(request, 'cards/card_from.html', {
+                'action': 'Create',
+                'error': 'Card ID and Name are required.',
+                'sets': Cardset.objects.all(),
+                'rarities': Card.RARITY_CHOICES,
+            })
+        card_set = Cardset.objects.filter(set_id=set_id).first() if set_id else None
+        card = Cardset.objects.create(
+            card_id=card_id,
+            name=name,
+            supertype=supertype,
+            hp=int(hp) if hp else None,
+            rarity=rarity or '',
+            card_number=card_number or '',
+            artist=artist or '',
+            flavor_text=flavor_text or '',
+            image_small=image_small or '',
+            image_large=image_large or '',
+            card_set=card_set,
+        
+        )
+        return redirect(card.get_absolute_url())
     
-    )
-    return redirect(card.get_absolute_url())
-return render(request, 'cards/card_form.html', {
-    'action': 'Create',
-    'sets': Cardset.objects.all(),
-    'rarities': Card.RARITY_CHOICES,
-})
+    return render(request, 'cards/card_form.html', {
+        'action':'Create',
+        'sets': Cardset.objects.all(),
+        'rarities': Card.RARITY_CHOICES,
+    })
+
+
+def card_edit(request, card_id):
+    card = get_object_or_404(Card, card_id=card_id)
+
+    if request.method == 'POST':
+        card.name = request.POST.get('name', card.name)
+        card.supertype = request.POST.get('supertype', card.supertype)
+        card.rarity = request.POST.get('rarirty', card.rarity)
+        card.card_number = request.POST.get('card_number', card.card_number)
+        card.artist = request.POST.get('artist', card.artist)
+        card.flavor_text = request.POST.get('flavor_text', card.flavor_text)
+        card.image_small = request.POST.get('image_small', card.image_small)
+        card.image_large = request.POST.get('imag_large', card.image_large)
+        hp = request.POST.get('hp')
+        card.hp = int(hp) if hp else None
+        set_id = request.POST.get('card_set')
+        card.card_set = Cardset.objects.filter(set_id=set_id).first() if set_id else None
+        card.save()
+
+        return redirect(card.get_absolute_url())
+    
+    return render(request, 'cards/card_form.html', {
+        'action':'Edit',
+        'card':card,
+        'sets':Cardset.objects.all(),
+        'rarities':Card.RARITY_CHOICES,
+    })
+
+def card_delete(request, card_id):
+    card = get_object_or_404(Card, card_id=card_id)
+    if request.method == 'POST':
+        card.delete()
+        return redirect('cards:card_list')
+    return render(request, 'cards/card_confirm_delete.html', {'card': card})
