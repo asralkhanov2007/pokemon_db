@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}My Account{% endblock %}
+
+{% block content %}
+<div class="container auth-shell">
+  <div class="auth-hero">
+    <div>
+      <h1 class="auth-title">My Account</h1>
+      <p class="auth-sub">Trainer profile, security controls, and personal details.</p>
+    </div>
+    <div class="auth-avatar">👤</div>
+  </div>
+
+  <div class="auth-card">
+    <div class="auth-row"><div class="auth-k">🧾 Username</div><span>{{ request.user.username }}</span></div>
+    <div class="auth-row"><div class="auth-k">📧 Email</div><span>{{ request.user.email|default:'Not set' }}</span></div>
+    <div class="auth-row"><div class="auth-k">🏷️ First name</div><span>{{ request.user.first_name|default:'Not set' }}</span></div>
+    <div class="auth-row"><div class="auth-k">🏷️ Last name</div><span>{{ request.user.last_name|default:'Not set' }}</span></div>
+    <div class="auth-row"><div class="auth-k">🛡️ Status</div><span>{% if request.user.is_staff %}Admin{% else %}Member{% endif %}</span></div>
+
+    <div class="auth-actions">
+      <a class="btn btn-secondary" href="{% url 'password_change' %}">🔐 Change password</a>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="btn btn-primary" type="submit">🚪 Logout</button></form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Create Account{% endblock %}
+{% block content %}
+<div class="container auth-shell">
+  <div class="auth-hero"><div><h1 class="auth-title">Create Trainer Account</h1><p class="auth-sub">Save your identity and personalize your database experience.</p></div><div class="auth-avatar">✨</div></div>
+  <div class="auth-card">
+    <form method="post">{% csrf_token %}
+      <div class="auth-grid">
+      {% for field in form %}
+      <div class="auth-field" {% if field.name == 'password1' or field.name == 'password2' %}style="grid-column:1/-1"{% endif %}>
+        <label class="auth-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<p class="auth-note">{{ field.help_text|safe }}</p>{% endif %}
+        {% if field.errors %}<p class="auth-note" style="color:#ef4444;">{{ field.errors|striptags }}</p>{% endif %}
+      </div>
+      {% endfor %}
+      </div>
+      <div class="auth-actions"><button class="btn btn-primary" type="submit">🚀 Create account</button><a class="btn btn-secondary" href="{% url 'login' %}">I already have one</a></div>
+    </form>
+  </div>
+</div>
+{% endblock %}
