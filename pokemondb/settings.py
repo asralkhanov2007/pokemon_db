@@ -140,7 +140,14 @@ JAZZMIN_UI_TWEAKS = {
 
 DB_ENGINE = os.getenv('DB_ENGINE', 'sqlite')
 
-if DB_ENGINE == 'postgres':
+if os.getenv('DB_ENGINE', 'postgres') == 'sqlite':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -149,13 +156,6 @@ if DB_ENGINE == 'postgres':
             'PASSWORD': os.getenv('DB_PASSWORD', 'pokemon123'),
             'HOST': os.getenv('DB_HOST', 'localhost'),
             'PORT': os.getenv('DB_PORT', '5432'),
-        }
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
 
