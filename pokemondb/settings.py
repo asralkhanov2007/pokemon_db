@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import dj_database_url
 
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,9 +27,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-h)vtpu^*_ctzsz6l-ut7%hp@c=qx0brio4u3q)@(a=4#(mlvja'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 INTERNAL_IPS = ['127.0.0.1']
 
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',  
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -142,9 +144,14 @@ JAZZMIN_UI_TWEAKS = {
     },
 }
 
-DB_ENGINE = os.getenv('DB_ENGINE', 'sqlite')
+#Databse
 
-if os.getenv('DB_ENGINE', 'postgres') == 'sqlite':
+DATABASE_URL = os.getenv('DATABASE_URL')
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+    }
+elif os.getenv('DB_ENGINE', 'sqlite') == 'sqlite':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -157,7 +164,7 @@ else:
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.getenv('DB_NAME', 'pokemon_db'),
             'USER': os.getenv('DB_USER', 'pokemon_user'),
-            'PASSWORD': os.getenv('DB_PASSWORD', 'pokemon123'),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''),
             'HOST': os.getenv('DB_HOST', 'localhost'),
             'PORT': os.getenv('DB_PORT', '5432'),
         }
@@ -201,9 +208,13 @@ USE_TZ = False
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+
+#Security
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://localhost').split(',')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

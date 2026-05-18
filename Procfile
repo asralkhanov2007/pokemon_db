@@ -1,0 +1,1 @@
+web: gunicorn pokemondb.wsgi --log-file -
